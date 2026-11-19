@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.1.0",
+  "capability_id": "CAP-CSR-001",
+  "layout": "standard-skill-directory",
+  "entrypoint": "SKILL.md",
+  "paths": {
+    "rules_dir": "rules/",
+    "templates_dir": "templates/",
+    "config_path": "rules/config.json",
+    "rule_record_schema": "rules/rule-record.schema.json",
+    "porting_guide": "PORTING.md",
+    "limitations": "rules/limitations.md",
+    "parsing": "rules/parsing.md",
+    "standards_index": "rules/standards-index.md",
+    "glossary": "rules/glossary.md",
+    "coverage_schema": "templates/coverage-schema.json"
+  },
+  "recall_policy": {
+    "default_sensitivity": "wide",
+    "sensitivity_levels": [
+      "wide",
+      "standard",
+      "narrow"
+    ],
+    "wide_means": "召回优先；宽=允许误报，窄=精确短语",
+    "no_negative_exclusion": true,
+    "keep_all_hits": true,
+    "false_positive_handling": "由人工在输出台账剔除，能力本身不自动删除命中项"
+  },
+  "thresholds": {
+    "quantity_deviation_pct": 5,
+    "parameter_margin_pct": [
+      10,
+      20
+    ],
+    "runtime_headroom_pct": [
+      20,
+      30
+    ],
+    "page_estimate_paragraphs_per_page": 40,
+    "page_estimate_chars_per_page": 1200
+  },
+  "conclusions": [
+    "符合",
+    "存在风险",
+    "待核验",
+    "不适用"
+  ],
+  "severity_labels": {
+    "high": "高",
+    "medium": "中（待核验）",
+    "low": "低",
+    "not_applicable": "不适用"
+  },
+  "dimensions": {
+    "DIM-01": "技术参数一致性",
+    "DIM-02": "品牌型号符合性",
+    "DIM-03": "接口协议兼容性",
+    "DIM-04": "数量清单核对",
+    "DIM-05": "施工边界划分",
+    "DIM-06": "验收标准",
+    "DIM-07": "质保与售后责任",
+    "DIM-08": "合同效力与商务口径",
+    "DIM-09": "变更与履约控制",
+    "DIM-10": "知识产权与交付物",
+    "DIM-11": "责任划分与风险兜底",
+    "DIM-12": "移交与项目收尾"
+  },
+  "roles": {
+    "PM": "资深项目经理",
+    "TE": "技术总工",
+    "CM": "商务经理",
+    "PR": "采购/供应链经理",
+    "QA": "质量/测试经理",
+    "LG": "法务/合规",
+    "OM": "交付/运维经理",
+    "FI": "财务/成本经理"
+  },
+  "rule_sets": {
+    "risk": {
+      "file": "rules/checkitems-risk.md",
+      "count": 108,
+      "id_format": "A01 ~ T06（20 类 A~T）",
+      "rule_type": "contract_risk"
+    },
+    "quantity": {
+      "file": "rules/checkitems-quantity.md",
+      "count": 16,
+      "id_format": "R01 ~ R16",
+      "rule_type": "quantity_ratio"
+    },
+    "parameter": {
+      "file": "rules/checkitems-parameter.md",
+      "count": 63,
+      "id_format": "P01 ~ P63（14 组 G01~G14）",
+      "rule_type": "parameter_check"
+    },
+    "cross_check": {
+      "file": "rules/cross-checks.md",
+      "count": 7,
+      "id_format": "序号 1 ~ 7",
+      "rule_type": "cross_match"
+    }
+  },
+  "output_fields": [
+    "问题编号",
+    "对应条款或材料位置",
+    "问题描述",
+    "判定依据",
+    "风险等级",
+    "影响分析",
+    "整改建议"
+  ],
+  "output_extensibility": "可扩展字段，但 7 个字段不可删减、不可改名",
+  "issue_state": [
+    "待澄清",
+    "已澄清",
+    "已关闭",
+    "放弃"
+  ],
+  "confidence_levels": [
+    "确认",
+    "疑似",
+    "线索"
+  ],
+  "hit_methods": [
+    "关键词",
+    "表格核算",
+    "交叉推断",
+    "外部证据"
+  ],
+  "review_profiles": {
+    "default": "standard",
+    "quick": {
+      "description": "售前/投标快速筛查，只跑高价值规则子集",
+      "risk_categories": ["A", "B", "C", "D", "E", "H", "I", "P", "T"],
+      "quantity_rules": ["R01", "R02", "R03", "R10", "R11", "R14", "R15"],
+      "parameter_groups": ["G01", "G02", "G03", "G11", "G12", "G14"],
+      "expect_minutes": 30
+    },
+    "standard": {
+      "description": "合同交底/详细评审，全量 187 条",
+      "risk_categories": "ALL",
+      "quantity_rules": "ALL",
+      "parameter_groups": "ALL"
+    },
+    "verify": {
+      "description": "对既有台账做复核闭环，不新增全量条目",
+      "behavior": "only_recheck_existing_issues"
+    }
+  },
+  "stance": {
+    "default": "seller",
+    "allowed": ["seller", "gc", "owner", "supervisor"],
+    "note": "seller=投标方/供货方，gc=总包方，owner=业主，supervisor=监理；立场决定条款被解读为风险还是保护"
+  },
+  "checksum": {
+    "algorithm": "sha256",
+    "scope": "全部 .md/.json/.yaml 文件按相对路径升序排序",
+    "input": "文件相对路径 + \\0 + 文件字节（UTF-8 原样）逐个 update",
+    "output": "小写十六进制完整 64 位；对外可截断展示前 12 位，但必须标明为截断",
+    "note": "用于 {{RULESET_CHECKSUM}}；生成脚本见 verify_skill.py --checksum"
+  },
+  "output_schema": "templates/output-schema.json",
+  "placeholders": {
+    "notation": "{{NAME}}（通用模板记号，非任何平台专有语法）",
+    "catalog": "PORTING.md 第 1 节",
+    "runtime_required": [
+      "PROJECT_NAME",
+      "REVIEW_BATCH",
+      "MATERIAL_MANIFEST",
+      "PROJECT_BASELINE",
+      "OUTPUT_PATH",
+      "RULESET_CHECKSUM",
+      "TEXT_SEARCH_BACKEND",
+      "TABLE_READ_BACKEND",
+      "STRUCTURED_OUTPUT_BACKEND",
+      "DOC_PARSER",
+      "BOUNDARY_NOTICE",
+      "REVIEW_PROFILE",
+      "STANCE",
+      "LEDGER_PATH",
+      "RFI_PATH"
+    ],
+    "immutable": [
+      "output_fields",
+      "conclusions",
+      "severity_labels",
+      "rule_sets[*].count",
+      "rule_sets[*].id_format",
+      "recall_policy.no_negative_exclusion"
+    ]
+  },
+  "porting_note": "复制规则数据 → 按本文件配置阈值/词表/角色 → 实现 rules/workflow.md 流程 → 按 templates/ 输出 → 用样例回测召回率"
+}

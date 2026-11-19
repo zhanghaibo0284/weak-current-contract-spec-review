@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "覆盖台账（Coverage Ledger）字段契约",
+  "version": "1.0.0",
+  "description": "用于兑现 G1：187 条检查项逐项给结论。与 templates/issue-list-template.md 并列，不替代问题清单。",
+  "type": "object",
+  "required": [
+    "project",
+    "review_batch",
+    "review_profile",
+    "stance",
+    "ruleset_version",
+    "ruleset_checksum",
+    "expected_rows",
+    "actual_rows",
+    "generated_at",
+    "rows"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "review_batch": {
+      "type": "string",
+      "description": "审查批次，与问题编号前缀一致，如 CSR"
+    },
+    "review_profile": {
+      "type": "string",
+      "enum": ["quick", "standard", "verify"],
+      "default": "standard"
+    },
+    "stance": {
+      "type": "string",
+      "enum": ["seller", "gc", "owner", "supervisor"],
+      "default": "seller"
+    },
+    "ruleset_version": {
+      "type": "string",
+      "description": "规则集版本，如 1.0.0"
+    },
+    "ruleset_checksum": {
+      "type": "string",
+      "pattern": "^(sha256:)?[0-9a-f]{12,64}$",
+      "description": "算法见 PORTING.md 1.1；截断展示须标注"
+    },
+    "expected_rows": {
+      "type": "integer",
+      "description": "standard 档应为 187；quick 档为所选子集条数",
+      "minimum": 1
+    },
+    "actual_rows": {
+      "type": "integer",
+      "description": "必须等于 rows 长度，且等于 expected_rows",
+      "minimum": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "boundary_notice_ref": {
+      "type": "string",
+      "const": "rules/limitations.md",
+      "description": "7 条边界声明来源"
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "rule_set", "title", "conclusion"],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "pattern": "^(RISK|QTY|PARAM)-[A-Z]\\d{2}$",
+            "description": "带规则集前缀的完整编号，避免同号歧义"
+          },
+          "rule_set": {
+            "type": "string",
+            "enum": ["RISK", "QTY", "PARAM"]
+          },
+          "title": {
+            "type": "string",
+            "description": "检查项名称"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": ["符合", "存在风险", "待核验", "不适用"]
+          },
+          "locator": {
+            "type": "string",
+            "description": "证据锚点；结论为待核验且材料缺失时填「材料缺失」"
+          },
+          "issue_id": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,8}-\\d{3,}$",
+            "description": "结论为存在风险时必填，且须在问题清单中存在"
+          },
+          "pending_reason": {
+            "type": "string",
+            "description": "结论为待核验时必填：需补充材料或异常码 E-01~E-08"
+          },
+          "not_applicable_reason": {
+            "type": "string",
+            "description": "结论为不适用时必填"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["确认", "疑似", "线索"]
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "conclusion": { "const": "存在风险" } } },
+            "then": { "required": ["issue_id"] }
+          },
+          {
+            "if": { "properties": { "conclusion": { "const": "待核验" } } },
+            "then": { "required": ["pending_reason"] }
+          },
+          {
+            "if": { "properties": { "conclusion": { "const": "不适用" } } },
+            "then": { "required": ["not_applicable_reason"] }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": true,
+  "x-constraints": [
+    "rows 中 rule_id 全局唯一，不得重复",
+    "standard 档 expected_rows 必须为 187（RISK 108 + QTY 16 + PARAM 63）",
+    "存在风险的 issue_id 必须能在问题清单中检索到",
+    "问题条目的风险等级不得为「不适用」，该值仅属于本台账的 conclusion"
+  ]
+}

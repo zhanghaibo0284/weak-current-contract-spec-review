@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0.0",
+  "description": "结构化问题清单输出契约：每条问题必须且至少包含以下 7 个字段；字段名稳定，可扩展但不可删减、不可改名。",
+  "record_type": "review_issue",
+  "fields": [
+    {
+      "key": "f1",
+      "name": "问题编号",
+      "type": "string",
+      "required": true,
+      "format": "审查批次-序号，如 CSR-001；判定依据中引用规则须带规则集前缀（RISK- / QTY- / PARAM-），如 RISK-C01 / QTY-R05 / PARAM-P13",
+      "constraint": "不可重复"
+    },
+    {
+      "key": "f2",
+      "name": "对应条款或材料位置",
+      "type": "string",
+      "required": true,
+      "format": "文件名 + 册/章节/条款号/页码/表格行列",
+      "constraint": "必须可定位到原文"
+    },
+    {
+      "key": "f3",
+      "name": "问题描述",
+      "type": "string",
+      "required": true,
+      "format": "原文摘录 + 异常表现，不作主观定性",
+      "constraint": "引用原文，不改写含义"
+    },
+    {
+      "key": "f4",
+      "name": "判定依据",
+      "type": "string",
+      "required": true,
+      "format": "命中的检查项编号、判定信号、所用规则、核算过程（理论量 vs 清单量、偏差率）",
+      "constraint": "引用检查项编号；量化优先"
+    },
+    {
+      "key": "f5",
+      "name": "风险等级",
+      "type": "string",
+      "required": true,
+      "enum": [
+        "高",
+        "中（待核验）",
+        "低",
+        "不适用"
+      ],
+      "constraint": "与 rules/severity.md 升级规则一致"
+    },
+    {
+      "key": "f6",
+      "name": "影响分析",
+      "type": "string",
+      "required": true,
+      "format": "成本敞口、工期、验收、回款、合规与责任影响；尽量量化最不利值",
+      "constraint": "关联「可能的后果」字段"
+    },
+    {
+      "key": "f7",
+      "name": "整改建议",
+      "type": "string",
+      "required": true,
+      "format": "澄清问题、成本预留、条款修订、审批启动、责任人与时限",
+      "constraint": "动词开头，可验收"
+    }
+  ],
+  "extension_fields": [
+    {
+      "key": "x1",
+      "name": "状态",
+      "type": "string",
+      "required": false,
+      "enum": ["待澄清", "已澄清", "已关闭", "放弃"],
+      "default": "待澄清",
+      "note": "闭环状态机，见 rules/workflow.md 10.6；已关闭/放弃条目不得删除"
+    },
+    {
+      "key": "x2",
+      "name": "置信度",
+      "type": "string",
+      "required": false,
+      "enum": ["确认", "疑似", "线索"],
+      "default": "疑似",
+      "note": "与风险等级正交；人工剔除时按 确认 > 疑似 > 线索 排序"
+    },
+    {
+      "key": "x3",
+      "name": "命中方式",
+      "type": "string",
+      "required": false,
+      "enum": ["关键词", "表格核算", "交叉推断", "外部证据"],
+      "note": "说明该条目如何被发现，便于复核复现"
+    },
+    {
+      "key": "x4",
+      "name": "规则版本",
+      "type": "string",
+      "required": false,
+      "format": "规则集版本+校验和，如 1.0.0+sha256:ab12…",
+      "note": "审计留痕；缺失时视为不完整输出"
+    },
+    {
+      "key": "x5",
+      "name": "实际责任人",
+      "type": "string",
+      "required": false,
+      "note": "由建议责任人落地后的实名/岗位"
+    },
+    {
+      "key": "x6",
+      "name": "关闭时间",
+      "type": "string",
+      "required": false,
+      "format": "YYYY-MM-DD",
+      "note": "状态变为已关闭/放弃时必填"
+    },
+    {
+      "key": "x7",
+      "name": "证据文件",
+      "type": "string",
+      "required": false,
+      "note": "支撑该条目的原件文件名/版本/页码，用于审计"
+    }
+  ],
+  "extensibility": "允许追加字段，但上述 7 个核心字段不可删减、不可改名、不可改变顺序语义；扩展字段均为可选，缺失不构成输出错误",
+  "severity_rule": "问题条目的风险等级只能取 高 / 中（待核验）/ 低；「不适用」仅用于覆盖台账的结论列，不得出现在问题条目中（见 rules/severity.md 7.4）",
+  "boundary_notice": "rules/limitations.md（须随报告、台账表头与调用界面显著呈现）",
+  "page_hint": "页码为估算值，仅供定位参考，请以文档实际分页为准；精确定位请使用「对应条款或材料位置」与原文检索。",
+  "placeholders": "见 PORTING.md 第 1 节"
+}

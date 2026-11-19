@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "description": "三类规则共用的通用记录结构；以 rule_type 区分，不绑定存储格式（JSON/CSV/表格均可）",
+  "fields": [
+    {
+      "name": "rule_id",
+      "type": "string",
+      "example": "C01",
+      "note": "全局唯一编号"
+    },
+    {
+      "name": "rule_type",
+      "type": "string",
+      "enum": [
+        "contract_risk",
+        "quantity_ratio",
+        "parameter_check"
+      ],
+      "note": "三类规则共用结构"
+    },
+    {
+      "name": "dimension",
+      "type": "string",
+      "example": "DIM-01"
+    },
+    {
+      "name": "category",
+      "type": "string",
+      "example": "C"
+    },
+    {
+      "name": "check_point",
+      "type": "string",
+      "note": "检查要点（问句）"
+    },
+    {
+      "name": "signal",
+      "type": "string",
+      "note": "异常判定信号（命中即疑似风险）"
+    },
+    {
+      "name": "evidence_source",
+      "type": "string",
+      "note": "证据来源（文档定位）"
+    },
+    {
+      "name": "method",
+      "type": "string",
+      "note": "核查方法与处置建议"
+    },
+    {
+      "name": "level",
+      "type": "string",
+      "enum": [
+        "高",
+        "中",
+        "低"
+      ]
+    },
+    {
+      "name": "owner",
+      "type": "string",
+      "note": "主责角色"
+    },
+    {
+      "name": "co_owner",
+      "type": "string",
+      "note": "协同角色"
+    },
+    {
+      "name": "sensitivity",
+      "type": "array",
+      "items": "string",
+      "example": [
+        "wide",
+        "standard",
+        "narrow"
+      ]
+    },
+    {
+      "name": "enabled",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "note": "修改规则后重载即生效，无需改动流程逻辑；字段可映射到任意平台的配置存储。"
+}
