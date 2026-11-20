@@ -10,8 +10,12 @@
 weak-current-contract-spec-review/
 ├── SKILL.md
 ├── README.md
+├── INSTALL.md
 ├── PORTING.md
 ├── MANIFEST.md
+├── CHECKSUM.txt
+├── install.ps1
+├── install.sh
 ├── verify_skill.py
 ├── rules/
 │   ├── adjudication.md
@@ -44,43 +48,44 @@ weak-current-contract-spec-review/
     └── rfi-list.md
 ```
 
-共 30 个文件，合计 2592 行（不含 MANIFEST.md 自身）。
+共 31 个文件，合计 2916 行（不含 MANIFEST.md 自身）。
 
 ## 2. 逐文件内容索引
 
 | 路径 | 行数 | 字节 | 校验和（SHA-256 前 12 位） | 职责 | 来源 |
 |---|---|---|---|---|---|
-| `PORTING.md` | 94 | 8309 | `0cfef90a77c7` | 占位符目录、按平台形态的替换要点、校验和算法、回测建议 | 重新组织 + 本次补充 |
-| `README.md` | 105 | 5012 | `57fd807e14ca` | 目录说明 / 快速上手 | 重新组织 |
-| `SKILL.md` | 163 | 11363 | `eade01b039ef` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
+| `PORTING.md` | 94 | 8403 | `93def1a883a1` | 占位符目录、按平台形态的替换要点、校验和算法、回测建议 | 重新组织 + 本次补充 |
+| `README.md` | 207 | 8935 | `da4e5d694efd` | 目录说明 / 安装部署 / 快速上手 | 重新组织 |
+| `INSTALL.md` | 222 | 7847 | `97a71b5788a2` | 安装与部署指南：环境要求、依赖、三种安装方式、配置、校验、升级卸载、排障 | 新增 |
+| `SKILL.md` | 163 | 11526 | `d0cb2f23e5fa` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
 | `verify_skill.py` | — | — | — | 结构一致性校验器与校验和生成器 | 新增 |
-| `rules/adjudication.md` | 79 | 9692 | `2eef6e03cc1e` | 六类异常判定、3 个综合判定范式、召回优先词表 | 原 `SKILL.md` 第 9 章 |
-| `rules/capability.md` | 91 | 7432 | `1fa4908b2052` | 能力定位、适用/不适用场景、接入约定 | 原 `SKILL.md` 第 1~4 章与 12.3 节 |
-| `rules/checkitems-parameter.md` | 145 | 38121 | `80f1736dbe58` | 设备参数核实项 63 条（P01~P63 / 14 组） | 原 `SKILL.md` 第 8.3 节 |
-| `rules/checkitems-quantity.md` | 31 | 9574 | `22a322f4bae5` | 数量配比核查项 16 条（R01~R16） | 原 `SKILL.md` 第 8.2 节 |
-| `rules/checkitems-risk.md` | 228 | 65560 | `c9641f6f193a` | 合同风险检查项 108 条（20 类 A~T） | 原 `SKILL.md` 第 8.1 节 |
-| `rules/config.json` | 195 | 5737 | `17c27f93b698` | 机器可读配置：阈值/词表/档位/状态/校验和规范 | 重新组织 + 本次扩展 |
-| `rules/configuration.md` | 61 | 3731 | `6f7edd9709b7` | 可配置项清单与规则外置结构（人读版） | 原 `SKILL.md` 第 12 章 |
-| `rules/cross-checks.md` | 25 | 2254 | `db53e9be6e6c` | 7 组贯穿性交叉检查，引用带规则集前缀 | 原 `SKILL.md` 第 8.4 节 |
-| `rules/dimensions.md` | 60 | 7076 | `2483f63373e4` | 12 个审查维度与类别—维度映射 | 原 `SKILL.md` 第 6 章 |
-| `rules/glossary.md` | 86 | 5071 | `fa0a405aa0ce` | 弱电/轨道/合同术语表 | 新增 |
-| `rules/indexes.md` | 107 | 6681 | `91d1be8a0a27` | 角色映射、编号索引、证据来源对照、编号命名空间 A.4 | 原 `SKILL.md` 附录 A/B + 本次补充 |
-| `rules/inputs.md` | 47 | 3420 | `db256a76eb31` | 材料齐备性检查与齐备度门槛（阻断规则） | 原 `SKILL.md` 第 5 章 + 本次补充 |
-| `rules/limitations.md` | 20 | 1901 | `c0f36c34b370` | 边界与声明 7 条，须随输出呈现 | 原 `SKILL.md` 第 13 章 |
-| `rules/parsing.md` | 98 | 5400 | `cc2597d7da5f` | 解析契约、异常码 E-01~E-08、降级与解析质量声明 | 新增 |
-| `rules/rule-record.schema.json` | 87 | 1824 | `1732c98c9f7a` | 单条规则的数据结构 | 重新组织 |
-| `rules/severity.md` | 56 | 4213 | `5552fcd410ae` | 三级定义、待核验语义、升级规则、结论/等级消歧 | 原 `SKILL.md` 第 7 章 + 本次修正 |
-| `rules/standards-index.md` | 84 | 4143 | `55b6708734ab` | 常用标准规范基线与现行性核对方法 | 新增 |
-| `rules/workflow.md` | 86 | 6988 | `4d9aa3b798e7` | 六步流程、判定分支、角色、复核闭环、异常处理、状态机 | 原 `SKILL.md` 第 10 章 + 本次补充 |
-| `templates/auxiliary-tables.md` | 25 | 942 | `862b1a8a7cfa` | 项目基线表、数量核对表 | 原 `SKILL.md` 第 11.2 节 |
-| `templates/cost-model.md` | 64 | 3457 | `963c81e4c420` | 影响分析量化公式库 | 新增 |
-| `templates/coverage-ledger.md` | 91 | 4387 | `e790ac6a6b1a` | 187 条逐项结论台账（G1 强制交付物） | 新增 |
-| `templates/coverage-schema.json` | 143 | 4441 | `0345e8f8555a` | 覆盖台账字段契约与条件约束 | 新增 |
-| `templates/issue-list-template.md` | 65 | 4966 | `37494cac1c15` | 7 字段主模板、清单表头、填写示例、扩展字段、常见错误 | 原 `SKILL.md` 第 11.1 节 + 本次补齐 |
-| `templates/issue-record.yaml` | 13 | 1394 | `170dbcb7d0cf` | 单条问题记录样例 | 原 `SKILL.md` 第 11 章 |
-| `templates/output-schema.json` | 131 | 4510 | `b8ac39042b53` | 7 字段输出契约 + 7 个可选扩展字段 + 等级使用约束 | 重新组织 + 本次扩展 |
-| `templates/review-report.md` | 33 | 2187 | `26648a351e65` | 评审报告 10 节骨架、页码提示语、边界声明占位 | 原 `SKILL.md` 第 11.2 节 |
-| `templates/rfi-list.md` | 79 | 3949 | `b7d5f6607294` | 材料缺口清单、澄清问题单、版本差异登记表 | 新增 |
+| `rules/adjudication.md` | 79 | 9771 | `a4c18c98f8ef` | 六类异常判定、3 个综合判定范式、召回优先词表 | 原 `SKILL.md` 第 9 章 |
+| `rules/capability.md` | 91 | 7523 | `51e7c53d5de9` | 能力定位、适用/不适用场景、接入约定 | 原 `SKILL.md` 第 1~4 章与 12.3 节 |
+| `rules/checkitems-parameter.md` | 145 | 38266 | `f80dd5f769c5` | 设备参数核实项 63 条（P01~P63 / 14 组） | 原 `SKILL.md` 第 8.3 节 |
+| `rules/checkitems-quantity.md` | 31 | 9605 | `c739febd3fe4` | 数量配比核查项 16 条（R01~R16） | 原 `SKILL.md` 第 8.2 节 |
+| `rules/checkitems-risk.md` | 228 | 65788 | `cfd7fd17903b` | 合同风险检查项 108 条（20 类 A~T） | 原 `SKILL.md` 第 8.1 节 |
+| `rules/config.json` | 195 | 5932 | `aac4e1a9da8e` | 机器可读配置：阈值/词表/档位/状态/校验和规范 | 重新组织 + 本次扩展 |
+| `rules/configuration.md` | 61 | 3792 | `ff07effc4e88` | 可配置项清单与规则外置结构（人读版） | 原 `SKILL.md` 第 12 章 |
+| `rules/cross-checks.md` | 25 | 2279 | `3bd3e9040158` | 7 组贯穿性交叉检查，引用带规则集前缀 | 原 `SKILL.md` 第 8.4 节 |
+| `rules/dimensions.md` | 60 | 7136 | `0f8f264af5f0` | 12 个审查维度与类别—维度映射 | 原 `SKILL.md` 第 6 章 |
+| `rules/glossary.md` | 86 | 5157 | `6974e1168c3a` | 弱电/轨道/合同术语表 | 新增 |
+| `rules/indexes.md` | 107 | 6788 | `31b85c5be9cc` | 角色映射、编号索引、证据来源对照、编号命名空间 A.4 | 原 `SKILL.md` 附录 A/B + 本次补充 |
+| `rules/inputs.md` | 47 | 3467 | `5c7fb4f7ac08` | 材料齐备性检查与齐备度门槛（阻断规则） | 原 `SKILL.md` 第 5 章 + 本次补充 |
+| `rules/limitations.md` | 20 | 1921 | `2b90056fdb04` | 边界与声明 7 条，须随输出呈现 | 原 `SKILL.md` 第 13 章 |
+| `rules/parsing.md` | 98 | 5498 | `6401e23373d9` | 解析契约、异常码 E-01~E-08、降级与解析质量声明 | 新增 |
+| `rules/rule-record.schema.json` | 87 | 1911 | `4534f4001236` | 单条规则的数据结构 | 重新组织 |
+| `rules/severity.md` | 56 | 4269 | `ac2c0f6c5038` | 三级定义、待核验语义、升级规则、结论/等级消歧 | 原 `SKILL.md` 第 7 章 + 本次修正 |
+| `rules/standards-index.md` | 84 | 4227 | `b5ad0ed4075f` | 常用标准规范基线与现行性核对方法 | 新增 |
+| `rules/workflow.md` | 86 | 7074 | `22b2266dbb2e` | 六步流程、判定分支、角色、复核闭环、异常处理、状态机 | 原 `SKILL.md` 第 10 章 + 本次补充 |
+| `templates/auxiliary-tables.md` | 25 | 967 | `e56ac50435c6` | 项目基线表、数量核对表 | 原 `SKILL.md` 第 11.2 节 |
+| `templates/cost-model.md` | 64 | 3521 | `1f1f3f276f56` | 影响分析量化公式库 | 新增 |
+| `templates/coverage-ledger.md` | 91 | 4478 | `d392b74b55e0` | 187 条逐项结论台账（G1 强制交付物） | 新增 |
+| `templates/coverage-schema.json` | 143 | 4584 | `83a3a7168f4d` | 覆盖台账字段契约与条件约束 | 新增 |
+| `templates/issue-list-template.md` | 65 | 5031 | `65d2fb603e9e` | 7 字段主模板、清单表头、填写示例、扩展字段、常见错误 | 原 `SKILL.md` 第 11.1 节 + 本次补齐 |
+| `templates/issue-record.yaml` | 13 | 1407 | `44b586662bc9` | 单条问题记录样例 | 原 `SKILL.md` 第 11 章 |
+| `templates/output-schema.json` | 131 | 4641 | `4868cae25a70` | 7 字段输出契约 + 7 个可选扩展字段 + 等级使用约束 | 重新组织 + 本次扩展 |
+| `templates/review-report.md` | 33 | 2220 | `f15f3ca86cba` | 评审报告 10 节骨架、页码提示语、边界声明占位 | 原 `SKILL.md` 第 11.2 节 |
+| `templates/rfi-list.md` | 79 | 4028 | `dfac11608235` | 材料缺口清单、澄清问题单、版本差异登记表 | 新增 |
 
 ## 3. 逐文件内容大纲（主要文件）
 

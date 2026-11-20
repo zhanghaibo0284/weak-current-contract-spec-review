@@ -425,7 +425,7 @@ def compute_checksum() -> str:
         rel = p.relative_to(ROOT).as_posix().encode("utf-8")
         h.update(rel)
         h.update(b"\0")
-        h.update(p.read_bytes())
+        h.update(p.read_bytes().replace(b"\r\n", b"\n"))
     return h.hexdigest()
 
 
