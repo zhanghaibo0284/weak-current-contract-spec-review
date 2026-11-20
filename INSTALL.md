@@ -4,7 +4,7 @@
 
 - 版本：v1.1.1
 - 包校验值：以仓库根目录 `CHECKSUM.txt` 为准（由 `verify_skill.py --checksum` 生成）
-- 文件数：36（`SKILL.md` + `rules/` 18 个 + `templates/` 9 个 + 8 个文档/脚本/校验文件）
+- 文件数：37（`SKILL.md` + `rules/` 18 个 + `templates/` 9 个 + 8 个文档/脚本/校验文件）
 
 ---
 
@@ -114,7 +114,7 @@ chmod +x install.sh
    要求结构校验全部通过；再运行 python verify_skill.py --checksum
    输出必须与仓库根目录 CHECKSUM.txt 完全一致
 4. 如缺 python-docx：python -m pip install python-docx -i https://pypi.tuna.tsinghua.edu.cn/simple
-5. 清理临时目录，报告：安装路径、文件数（应为 36）、校验结果、指纹比对结果
+5. 清理临时目录，报告：安装路径、文件数（应为 37）、校验结果、指纹比对结果
 6. 不得修改 rules/ 下任何文件，不得执行仓库外的脚本
 ```
 
@@ -132,7 +132,7 @@ python verify_skill.py --checksum
 
 - 结构校验全部通过；
 - 校验输出与仓库根目录 `CHECKSUM.txt` 一致；
-- 技能目录内文件数为 36（不含 `.git`）。
+- 技能目录内文件数为 37（不含 `.git`）。
 
 还可以校验已有台账的完整性：
 
