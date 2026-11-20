@@ -14,8 +14,6 @@ weak-current-contract-spec-review/
 ├── PORTING.md
 ├── MANIFEST.md
 ├── CHECKSUM.txt
-├── install.ps1
-├── install.sh
 ├── verify_skill.py
 ├── rules/
 │   ├── adjudication.md
@@ -48,16 +46,16 @@ weak-current-contract-spec-review/
     └── rfi-list.md
 ```
 
-共 31 个文件，合计 2916 行（不含 MANIFEST.md 自身）。
+共 31 个文件，合计 2788 行（不含 MANIFEST.md 自身）。
 
 ## 2. 逐文件内容索引
 
 | 路径 | 行数 | 字节 | 校验和（SHA-256 前 12 位） | 职责 | 来源 |
 |---|---|---|---|---|---|
 | `PORTING.md` | 94 | 8403 | `93def1a883a1` | 占位符目录、按平台形态的替换要点、校验和算法、回测建议 | 重新组织 + 本次补充 |
-| `README.md` | 207 | 8935 | `da4e5d694efd` | 目录说明 / 安装部署 / 快速上手 | 重新组织 |
-| `INSTALL.md` | 222 | 7847 | `d9ef608c1725` | 安装与部署指南：环境要求、依赖、三种安装方式、配置、校验、升级卸载、排障 | 新增 |
-| `SKILL.md` | 163 | 11526 | `d0cb2f23e5fa` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
+| `README.md` | 200 | 8565 | `b70c3194ac64` | 目录说明 / 安装部署 / 快速上手 | 重新组织 |
+| `INSTALL.md` | 101 | 3773 | `1b3e902e078f` | 安装指南：文件清单、目标路径、安装提示词、校验与失败判据 | 新增 |
+| `SKILL.md` | 163 | 11363 | `917746571259` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
 | `verify_skill.py` | — | — | — | 结构一致性校验器与校验和生成器 | 新增 |
 | `rules/adjudication.md` | 79 | 9771 | `a4c18c98f8ef` | 六类异常判定、3 个综合判定范式、召回优先词表 | 原 `SKILL.md` 第 9 章 |
 | `rules/capability.md` | 91 | 7523 | `51e7c53d5de9` | 能力定位、适用/不适用场景、接入约定 | 原 `SKILL.md` 第 1~4 章与 12.3 节 |

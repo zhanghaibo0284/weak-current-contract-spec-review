@@ -24,7 +24,7 @@ weak-current-contract-spec-review/
 
 ## 安装与部署
 
-完整步骤见 [`INSTALL.md`](INSTALL.md)，以下为速查版。
+完整说明见 [`INSTALL.md`](INSTALL.md)。核心只有三步：完整复制目录 → 放到技能目录 → 运行校验。
 
 ### 环境要求
 
@@ -47,38 +47,29 @@ python -m pip install python-docx -i https://pypi.tuna.tsinghua.edu.cn/simple
 python3 -m pip install python-docx -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-### 方式一：一键脚本
+### 手动安装
+
+1. 克隆仓库：
 
 ```powershell
 git clone --depth 1 https://gitee.com/zhanghaibo0284/weak-current-contract-spec-review.git
-cd weak-current-contract-spec-review
-powershell -ExecutionPolicy Bypass -File .\install.ps1 -Target trae   # 或 -Target claude
 ```
 
-```bash
-git clone --depth 1 https://gitee.com/zhanghaibo0284/weak-current-contract-spec-review.git
-cd weak-current-contract-spec-review
-chmod +x install.sh
-./install.sh --target trae        # 或 --target claude；省略则自动识别
-```
+2. 将仓库内容完整复制到技能目录，目录名固定为 `weak-current-contract-spec-review`：
 
-脚本会校验 `SKILL.md`、备份同名旧目录、复制文件（排除 `.git`）、运行结构校验并比对 `CHECKSUM.txt`。
+| 平台 | 目标目录 |
+|---|---|
+| Claude Code（个人） | `~/.claude/skills/weak-current-contract-spec-review/` |
+| Claude Code（项目） | `<项目>/.claude/skills/weak-current-contract-spec-review/` |
+| Trae（个人） | `~/.trae-cn/skills/weak-current-contract-spec-review/` |
 
-### 方式二：手动安装
+3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 34。
 
-1. 克隆或解压仓库；
-2. 将内容复制到 `~/.claude/skills/weak-current-contract-spec-review/` 或 `~/.trae-cn/skills/weak-current-contract-spec-review/`；
-3. 确保 `SKILL.md` 直接位于该目录下（不要多套一层），排除 `.git`；
 4. 重启 Claude Code / Trae。
 
-### 方式三：让智能体安装
+### 智能体安装
 
-```text
-安装技能：https://gitee.com/zhanghaibo0284/weak-current-contract-spec-review.git
-克隆后把内容放到 ~/.claude/skills/weak-current-contract-spec-review/（Trae 为 ~/.trae-cn/skills/...），
-确保 SKILL.md 直接在该目录下、排除 .git，然后运行 python verify_skill.py 与
-python verify_skill.py --checksum，将结果与 CHECKSUM.txt 比对后报告。
-```
+把 [`INSTALL.md`](INSTALL.md) 第 3 节的提示词整段发给智能体即可，其中已写明文件清单、目标路径、排除项和验收命令。
 
 ### 配置
 
@@ -99,15 +90,17 @@ python verify_skill.py --checksum，将结果与 CHECKSUM.txt 比对后报告。
 
 ```powershell
 cd ~/.trae-cn/skills/weak-current-contract-spec-review
-python verify_skill.py              # 结构校验应全部通过
-python verify_skill.py --checksum   # 与仓库根目录 CHECKSUM.txt 比对
+python verify_skill.py              # 失败数必须为 0
+python verify_skill.py --checksum   # 必须与仓库根目录 CHECKSUM.txt 一致
 ```
+
+三条同时满足才算安装完成：失败数 0、文件数 34、校验值与 `CHECKSUM.txt` 一致。
 
 ### 升级与卸载
 
 ```powershell
 git -C <仓库目录> pull
-powershell -ExecutionPolicy Bypass -File <仓库目录>\install.ps1 -Target trae
+# 重新完整复制到技能目录并重启平台，然后重新校验
 Remove-Item "$env:USERPROFILE\.trae-cn\skills\weak-current-contract-spec-review" -Recurse -Force
 ```
 
@@ -116,10 +109,10 @@ Remove-Item "$env:USERPROFILE\.trae-cn\skills\weak-current-contract-spec-review"
 | 现象 | 处理 |
 |---|---|
 | 平台看不到技能 | 检查目录名、是否多套一层、是否重启 |
-| 只输出泛泛建议 | 确认 `rules/` 与 `templates/` 已一起安装 |
+| 只输出泛泛建议 | 确认 `rules/` 与 `templates/` 已一起复制 |
 | 无覆盖台账 | 声明使用 `standard` 档 |
 | `.docx` 解析失败 | 安装 `python-docx`，旧 `.doc` 另存为 `.docx` |
-| 校验失败 | 重新安装，核对 `CHECKSUM.txt` |
+| 校验失败 | 按 `INSTALL.md` 第 1 节重新完整复制，再校验 |
 
 ---
 
@@ -199,7 +192,7 @@ python verify_skill.py --ledger out/coverage-ledger.md   # 校验台账完整性
 
 ## 版本与来源
 
-- 版本 1.1.1：打包与安装修订——新增 `INSTALL.md`、`install.ps1`、`install.sh`、`CHECKSUM.txt`，补充 README 安装说明；规则文件与 7 字段契约未变。
+- 版本 1.1.2：安装方式简化为「完整复制目录 + 校验」，移除安装脚本；新增 `INSTALL.md` 与 `CHECKSUM.txt`；规则文件与 7 字段契约未变。
 - 版本 1.1.0，能力编号 CAP-CSR-001（在 1.0.0 基础上做向后兼容修订，7 字段与规则编号未变）。
 - 1.1.0 主要变化：新增覆盖台账与校验器、补齐空模板、统一等级枚举、增加异常码与状态机、
   明确编号命名空间；均为增量，不破坏既有台账。
