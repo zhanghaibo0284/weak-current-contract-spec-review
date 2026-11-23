@@ -1,6 +1,6 @@
 # 安装指南
 
-本仓库是一个平台中立的 Skill 包。安装 = 把整个目录放到平台技能目录 + 校验通过，共 39 个文件。
+本仓库是一个平台中立的 Skill 包。安装 = 把整个目录放到平台技能目录 + 校验通过，共 40 个文件。
 
 - 版本：v1.2.0
 - 校验值：以仓库根目录 `CHECKSUM.txt` 为准
@@ -22,7 +22,7 @@ weak-current-contract-spec-review/
 └── templates/    # 9 个：问题清单、覆盖台账、RFI、报告、成本模型等
 ```
 
-- 合计 **39 个文件**（不含 `.git`）。
+- 合计 **40 个文件**（不含 `.git`）。
 - `rules/` 与 `templates/` 必须整目录复制，缺一个都会导致规则失效或台账无法生成。
 - 复制时排除：`.git`、`.screenshots`、`__pycache__`。
 
@@ -65,7 +65,7 @@ weak-current-contract-spec-review/
    SKILL.md 必须直接位于该目录下，不得多套一层；
    必须包含 rules/ 与 templates/ 两个完整目录；
    排除 .git、.screenshots、__pycache__
-4. 确认文件总数为 39（不含 .git）
+4. 确认文件总数为 40（不含 .git）
 5. 进入目录运行：python verify_skill.py，失败数必须为 0；
    再运行 python verify_skill.py --checksum，输出须与 CHECKSUM.txt 完全一致
 6. 清理临时目录，报告：安装路径、文件数、校验结果、指纹比对结果

@@ -64,7 +64,7 @@ git clone --depth 1 https://gitee.com/zhanghaibo0284/weak-current-contract-spec-
 | Claude Code（项目） | `<项目>/.claude/skills/weak-current-contract-spec-review/` |
 | Trae（个人） | `~/.trae-cn/skills/weak-current-contract-spec-review/` |
 
-3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 39。
+3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 40。
 
 4. 重启 Claude Code / Trae。
 
@@ -95,7 +95,7 @@ python verify_skill.py              # 失败数必须为 0
 python verify_skill.py --checksum   # 必须与仓库根目录 CHECKSUM.txt 一致
 ```
 
-三条同时满足才算安装完成：失败数 0、文件数 39、校验值与 `CHECKSUM.txt` 一致。
+三条同时满足才算安装完成：失败数 0、文件数 40、校验值与 `CHECKSUM.txt` 一致。
 
 ### 升级与卸载
 

@@ -14,6 +14,7 @@ weak-current-contract-spec-review/
 ├── PORTING.md
 ├── MANIFEST.md
 ├── CHECKSUM.txt
+├── .gitignore
 ├── verify_skill.py
 ├── guard/
 │   ├── canonical.py
