@@ -9,6 +9,7 @@
     python verify_skill.py                 # 全量校验
     python verify_skill.py --checksum      # 只输出 {{RULESET_CHECKSUM}}
     python verify_skill.py --ledger F.md   # 额外校验覆盖台账文件
+    python verify_skill.py --run DIR       # 校验一次审查产物（清单/记录/指纹）
 
 退出码：0=全部通过；1=存在失败项。
 """
@@ -115,6 +116,9 @@ REQUIRED_FILES = [
     "templates/review-report.md", "templates/coverage-ledger.md",
     "templates/coverage-schema.json", "templates/rfi-list.md",
     "templates/cost-model.md",
+    "templates/run-manifest.schema.json",
+    "guard/canonical.py", "guard/validate.py",
+    "guard/evolve.py", "guard/selftest.py",
 ]
 
 
@@ -429,16 +433,89 @@ def compute_checksum() -> str:
     return h.hexdigest()
 
 
+# ---------------------------------------------------------------- 11. 运行产物
+def check_run(run_dir: str) -> None:
+    """校验一次运行产物的清单与问题记录（CON C1/C5）。"""
+    sys.path.insert(0, str(ROOT / "guard"))
+    try:
+        from validate import validate_records, verify_output_hash
+    except Exception as exc:  # noqa: BLE001
+        fail("运行产物", f"无法加载 guard 校验模块：{exc}")
+        return
+
+    base = Path(run_dir)
+    manifest_path = base / "run_manifest.json"
+    issues_path = base / "issues.json"
+    if not manifest_path.is_file():
+        fail("运行清单", "缺少 run_manifest.json")
+        return
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        fail("运行清单", f"JSON 解析失败：{exc}")
+        return
+
+    required = {"input_hash", "params_hash", "ruleset_checksum", "output_hash",
+                "review_date", "stance", "profile"}
+    missing = sorted(required - set(manifest))
+    if missing:
+        fail("运行清单字段", "缺少：" + ", ".join(missing))
+    else:
+        ok("运行清单字段", "7 项必备指纹与参数齐全")
+
+    if not issues_path.is_file():
+        warn("运行产物", "未找到 issues.json，跳过记录校验")
+        return
+    try:
+        payload = json.loads(issues_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        fail("问题清单", f"JSON 解析失败：{exc}")
+        return
+    records = payload.get("issues", payload) if isinstance(payload, dict) else payload
+    if not isinstance(records, list):
+        fail("问题清单", "issues.json 结构应为数组或 {issues: [...]}")
+        return
+    errors = validate_records(records)
+    if errors:
+        fail("问题记录契约", "；".join(errors[:5]))
+    else:
+        ok("问题记录契约", f"{len(records)} 条通过 7 字段与枚举校验")
+
+    core = {k: manifest[k] for k in ("input_hash", "params_hash", "ruleset_checksum")}
+    claimed = str(manifest.get("output_hash", ""))
+    ledger_path = base / "ledger.json"
+    ledger = []
+    if ledger_path.is_file():
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    mismatches = verify_output_hash(records, ledger, core, claimed)
+    if mismatches:
+        fail("产物指纹", "；".join(mismatches))
+    else:
+        ok("产物指纹", "output_hash 重算一致")
+
+
 # ---------------------------------------------------------------- main
 def main() -> int:
     parser = argparse.ArgumentParser(description="结构一致性校验")
     parser.add_argument("--checksum", action="store_true", help="只输出规则集校验和")
     parser.add_argument("--ledger", help="额外校验覆盖台账 Markdown 文件")
+    parser.add_argument("--run", help="校验一次审查输出目录（run_manifest.json + issues.json）")
     args = parser.parse_args()
 
     if args.checksum:
         print(compute_checksum())
         return 0
+
+    if args.run:
+        check_run(args.run)
+        width = max(len(name) for name, _, _ in results)
+        failed = 0
+        for name, passed, detail in results:
+            print(f"[{'PASS' if passed else 'FAIL'}] {name.ljust(width)}  {detail}")
+            failed += 0 if passed else 1
+        print("-" * 60)
+        print(f"合计 {len(results)} 项，失败 {failed} 项")
+        return 1 if failed else 0
 
     check_files()
     check_json()

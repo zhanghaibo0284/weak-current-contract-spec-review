@@ -13,7 +13,8 @@ weak-current-contract-spec-review/
 ├── README.md             本文件：快速上手
 ├── PORTING.md            跨平台导入：占位符、校验和算法、回测建议
 ├── MANIFEST.md           完整目录、逐文件索引、校验结果
-├── verify_skill.py       结构一致性校验器（可复现）
+├── verify_skill.py       结构一致性校验器（可复现，支持 --run 校验产物）
+├── guard/                确定性内核 / 一致性校验 / 进化门禁 + 自检
 ├── rules/                规则、解析契约、标准基线、术语、配置
 └── templates/            问题清单、覆盖台账、RFI、报告、成本模型
 ```
@@ -63,7 +64,7 @@ git clone --depth 1 https://gitee.com/zhanghaibo0284/weak-current-contract-spec-
 | Claude Code（项目） | `<项目>/.claude/skills/weak-current-contract-spec-review/` |
 | Trae（个人） | `~/.trae-cn/skills/weak-current-contract-spec-review/` |
 
-3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 34。
+3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 39。
 
 4. 重启 Claude Code / Trae。
 
@@ -94,7 +95,7 @@ python verify_skill.py              # 失败数必须为 0
 python verify_skill.py --checksum   # 必须与仓库根目录 CHECKSUM.txt 一致
 ```
 
-三条同时满足才算安装完成：失败数 0、文件数 34、校验值与 `CHECKSUM.txt` 一致。
+三条同时满足才算安装完成：失败数 0、文件数 39、校验值与 `CHECKSUM.txt` 一致。
 
 ### 升级与卸载
 
@@ -192,7 +193,7 @@ python verify_skill.py --ledger out/coverage-ledger.md   # 校验台账完整性
 
 ## 版本与来源
 
-- 版本 1.1.3：安装提示词改为平台中立——不指定具体智能体，由智能体按自身技能目录约定安装；规则文件与 7 字段契约未变。
+- 版本 1.2.0：接入确定性内核与运行清单——新增 `guard/`（归一化/稳定编号/指纹/一致性校验/进化门禁）与 `--run` 产物校验；规则文本与 7 字段契约未变。
 - 版本 1.1.0，能力编号 CAP-CSR-001（在 1.0.0 基础上做向后兼容修订，7 字段与规则编号未变）。
 - 1.1.0 主要变化：新增覆盖台账与校验器、补齐空模板、统一等级枚举、增加异常码与状态机、
   明确编号命名空间；均为增量，不破坏既有台账。
