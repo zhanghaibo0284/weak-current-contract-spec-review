@@ -119,6 +119,10 @@ REQUIRED_FILES = [
     "templates/run-manifest.schema.json",
     "guard/canonical.py", "guard/validate.py",
     "guard/evolve.py", "guard/selftest.py",
+    "guard/golden.py", "guard/versions.py", "guard/evolve_cli.py",
+    "evolve/README.md", "evolve/golden/schema.json", "evolve/golden/index.json",
+    "evolve/golden/cases/G-001.json", "evolve/golden/cases/G-002.json",
+    "evolve/golden/cases/G-003.json",
 ]
 
 
@@ -494,6 +498,99 @@ def check_run(run_dir: str) -> None:
         ok("产物指纹", "output_hash 重算一致")
 
 
+# ---------------------------------------------------------------- 12. 黄金集
+GOLDEN_REQUIRED = {"case_id", "title", "materials", "params", "expected"}
+GOLDEN_PARAMS = {"stance", "profile", "recall", "review_date", "rule_version", "locale"}
+GOLDEN_CONCLUSIONS = {"符合", "存在风险", "待核验", "不适用"}
+GOLDEN_SEVERITIES = {"高", "中（待核验）", "低", "不适用"}
+GOLDEN_REF_RE = re.compile(r"^(RISK-[A-T]\d{2}|QTY-R\d{2}|PARAM-P\d{2})$")
+
+
+def check_golden() -> None:
+    """黄金集索引与用例：文件数一致、必备字段齐全、编号与枚举合法。"""
+    try:
+        index = load_json("evolve/golden/index.json")
+    except Exception as exc:  # noqa: BLE001
+        fail("黄金集索引一致性", str(exc))
+        return
+
+    case_dir = ROOT / "evolve" / "golden" / "cases"
+    files = sorted(p.name for p in case_dir.glob("*.json"))
+    entries = index.get("cases") or []
+    listed = sorted(Path(str(e.get("file", ""))).name for e in entries)
+    if files and files == listed and len(entries) == len(files):
+        ok("黄金集索引一致性", f"{len(files)} 例")
+    else:
+        fail(
+            "黄金集索引一致性",
+            f"索引 {len(entries)} 条 / 文件 {len(files)} 个"
+            f"（磁盘={','.join(files)}；索引={','.join(listed)}）",
+        )
+
+    problems = []
+    rows_total = 0
+    for name in files:
+        case = json.loads((case_dir / name).read_text(encoding="utf-8"))
+        missing = GOLDEN_REQUIRED - set(case)
+        if missing:
+            problems.append(f"{name} 缺字段 {','.join(sorted(missing))}")
+        params = case.get("params") or {}
+        lost = GOLDEN_PARAMS - set(params)
+        if lost:
+            problems.append(f"{name} 缺参数 {','.join(sorted(lost))}")
+        rows = case.get("expected") or []
+        rows_total += len(rows)
+        seen = set()
+        for i, row in enumerate(rows):
+            rid = str(row.get("编号", "")).strip()
+            if not GOLDEN_REF_RE.match(rid):
+                problems.append(f"{name}[{i}] 编号非法 {rid}")
+            if rid in seen:
+                problems.append(f"{name}[{i}] 编号重复 {rid}")
+            seen.add(rid)
+            if row.get("结论") not in GOLDEN_CONCLUSIONS:
+                problems.append(f"{name}[{i}] 结论非法")
+            if row.get("风险等级") not in GOLDEN_SEVERITIES:
+                problems.append(f"{name}[{i}] 等级非法")
+
+    if problems:
+        fail("黄金集用例字段", "；".join(problems[:6]))
+    else:
+        ok("黄金集用例字段", f"{rows_total} 行期望结论")
+
+
+# ---------------------------------------------------------------- 13. 进化白名单
+def check_evolve_whitelist() -> None:
+    """A 类键必须在 config.json 中真实存在，且不得与不可变项交集。"""
+    sys.path.insert(0, str(ROOT / "guard"))
+    try:
+        from evolve import ALLOWED_KEYS, classify_key
+    except Exception as exc:  # noqa: BLE001
+        fail("进化白名单可解析", f"无法加载 evolve：{exc}")
+        return
+
+    config = load_json("rules/config.json")
+
+    def resolvable(dotted: str) -> bool:
+        node = config
+        for part in dotted.split("."):
+            if not isinstance(node, dict) or part not in node:
+                return False
+            node = node[part]
+        return True
+
+    unresolvable = sorted(k for k in ALLOWED_KEYS if not resolvable(k))
+    misclassified = sorted(k for k in ALLOWED_KEYS if classify_key(k) != "A")
+    if unresolvable or misclassified:
+        fail(
+            "进化白名单可解析",
+            "配置中不存在：" + ",".join(unresolvable)
+            + "；分级异常：" + ",".join(misclassified),
+        )
+    else:
+        ok("进化白名单可解析", f"{len(ALLOWED_KEYS)} 个 A 类键")
+
+
 # ---------------------------------------------------------------- main
 def main() -> int:
     parser = argparse.ArgumentParser(description="结构一致性校验")
@@ -526,6 +623,8 @@ def main() -> int:
     check_placeholders()
     check_stale_chapters()
     check_manifest()
+    check_golden()
+    check_evolve_whitelist()
     if args.ledger:
         check_ledger(args.ledger)
 

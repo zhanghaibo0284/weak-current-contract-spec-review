@@ -22,6 +22,14 @@ IMMUTABLE_KEYS = {
     "placeholders",
 }
 
+# B 类：影响判定分支/维度归属/升级条件，需双人审批与灰度；P3 不开放自动流水线
+B_CLASS_KEYS = {
+    "dimensions",
+    "severity",
+    "cross_checks",
+    "rule_sets.cross_check",
+}
+
 # 可进化：配置轴 + 合法区间（边界即安全护栏）
 ALLOWED_KEYS = {
     "thresholds.quantity_deviation_pct": (1, 10),
@@ -35,6 +43,31 @@ ALLOWED_KEYS = {
 }
 
 PROPOSAL_KEYS = {"base_version", "new_version", "changes", "evidence_runs", "approved_by"}
+
+
+def _is_b_class(key: str) -> bool:
+    return any(key == b or key.startswith(b + ".") for b in B_CLASS_KEYS)
+
+
+def classify_key(key: str) -> str:
+    """键分级：A=可自动提案，B=需双人审批（P3 拒绝），C=不可变。"""
+    if key in IMMUTABLE_KEYS or any(key == ik or key.startswith(ik + ".") for ik in IMMUTABLE_KEYS):
+        return "C"
+    if key in ALLOWED_KEYS:
+        return "A"
+    if _is_b_class(key):
+        return "B"
+    return "unknown"
+
+
+def approvers_of(proposal: dict) -> list[str]:
+    """审批人支持字符串或数组；空白项忽略。"""
+    raw = proposal.get("approved_by")
+    if isinstance(raw, str):
+        raw = [raw]
+    if not isinstance(raw, list):
+        return []
+    return [str(item).strip() for item in raw if str(item).strip()]
 
 
 def _parse_version(v: str) -> tuple[int, int, int]:
@@ -73,6 +106,9 @@ def validate_proposal(proposal: dict) -> list[str]:
         ):
             errors.append("禁止修改不可变项: " + key)
             continue
+        if _is_b_class(key):
+            errors.append("B 类键需双人审批与灰度，P3 不开放自动发布: " + key)
+            continue
         if key not in ALLOWED_KEYS:
             errors.append("键不在进化白名单: " + key)
             continue
@@ -86,7 +122,7 @@ def validate_proposal(proposal: dict) -> list[str]:
 
     if not isinstance(proposal.get("evidence_runs"), int) or proposal["evidence_runs"] < 30:
         errors.append("证据样本不足：至少 30 次历史运行")
-    if not str(proposal.get("approved_by", "")).strip():
+    if not approvers_of(proposal):
         errors.append("缺少人工审批人")
     return errors
 
@@ -140,7 +176,7 @@ def apply_proposal(config: dict, proposal: dict, versions_dir: str) -> Path:
         "new_version": proposal["new_version"],
         "changes": proposal["changes"],
         "evidence_runs": proposal["evidence_runs"],
-        "approved_by": proposal["approved_by"],
+        "approved_by": approvers_of(proposal),
         "config_checksum": sha256_hex(canonical_json(new_cfg)),
     }
     (out_dir / "proposal.json").write_text(

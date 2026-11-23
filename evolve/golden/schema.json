@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evolve/golden/schema.json",
+  "title": "黄金集用例",
+  "description": "匿名化回归用例：输入材料 + 参数轴 + 期望台账行（编号/结论/风险等级）。只用于离线回测，不参与规则指纹。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "title",
+    "materials",
+    "params",
+    "expected"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "pattern": "^G-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_type": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stance",
+        "profile",
+        "recall",
+        "review_date",
+        "rule_version",
+        "locale"
+      ],
+      "properties": {
+        "stance": {
+          "enum": [
+            "seller",
+            "gc",
+            "owner",
+            "supervisor"
+          ]
+        },
+        "profile": {
+          "enum": [
+            "quick",
+            "standard",
+            "verify"
+          ]
+        },
+        "recall": {
+          "enum": [
+            "wide",
+            "standard",
+            "narrow"
+          ]
+        },
+        "review_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "rule_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "locale": {
+          "const": "zh-CN"
+        }
+      }
+    },
+    "expected": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "编号",
+          "结论",
+          "风险等级"
+        ],
+        "properties": {
+          "编号": {
+            "type": "string",
+            "pattern": "^(RISK-[A-T][0-9]{2}|QTY-R[0-9]{2}|PARAM-P[0-9]{2})$"
+          },
+          "结论": {
+            "enum": [
+              "符合",
+              "存在风险",
+              "待核验",
+              "不适用"
+            ]
+          },
+          "风险等级": {
+            "enum": [
+              "高",
+              "中（待核验）",
+              "低",
+              "不适用"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

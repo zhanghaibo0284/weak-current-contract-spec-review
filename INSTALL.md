@@ -1,8 +1,8 @@
 # 安装指南
 
-本仓库是一个平台中立的 Skill 包。安装 = 把整个目录放到平台技能目录 + 校验通过，共 40 个文件。
+本仓库是一个平台中立的 Skill 包。安装 = 把整个目录放到平台技能目录 + 校验通过，共 49 个文件。
 
-- 版本：v1.2.0
+- 版本：v1.3.0
 - 校验值：以仓库根目录 `CHECKSUM.txt` 为准
 
 ---
@@ -19,12 +19,14 @@ weak-current-contract-spec-review/
 ├── CHECKSUM.txt
 ├── verify_skill.py
 ├── rules/        # 18 个：187 条规则、config.json、schema、标准基线
-└── templates/    # 9 个：问题清单、覆盖台账、RFI、报告、成本模型等
+├── templates/    # 10 个：问题清单、覆盖台账、RFI、报告、成本模型等
+├── guard/        # 7 个：确定性内核、一致性校验、进化门禁、黄金集评分、版本化、命令行、自检
+└── evolve/       # 6 个：进化说明 + 黄金集索引/契约 + 3 个匿名化用例
 ```
 
-- 合计 **40 个文件**（不含 `.git`）。
-- `rules/` 与 `templates/` 必须整目录复制，缺一个都会导致规则失效或台账无法生成。
-- 复制时排除：`.git`、`.screenshots`、`__pycache__`。
+- 合计 **49 个文件**（不含 `.git`）。
+- `rules/`、`templates/`、`guard/`、`evolve/` 必须整目录复制，缺一个都会导致规则失效、台账无法生成或进化校验失败。
+- 复制时排除：`.git`、`.screenshots`、`__pycache__`、`versions/`。
 
 ---
 
@@ -63,9 +65,9 @@ weak-current-contract-spec-review/
    - 无法确定时先询问用户，不要自行假设。
 3. 将仓库内容完整复制到目标目录：
    SKILL.md 必须直接位于该目录下，不得多套一层；
-   必须包含 rules/ 与 templates/ 两个完整目录；
-   排除 .git、.screenshots、__pycache__
-4. 确认文件总数为 40（不含 .git）
+   必须包含 rules/、templates/、guard/、evolve/ 四个完整目录；
+   排除 .git、.screenshots、__pycache__、versions/
+4. 确认文件总数为 49（不含 .git）
 5. 进入目录运行：python verify_skill.py，失败数必须为 0；
    再运行 python verify_skill.py --checksum，输出须与 CHECKSUM.txt 完全一致
 6. 清理临时目录，报告：安装路径、文件数、校验结果、指纹比对结果
@@ -93,7 +95,7 @@ python verify_skill.py --checksum
 通过标准（三条同时满足）：
 
 1. 校验失败数为 **0**；
-2. 文件总数为 **39**（不含 `.git`）；
+2. 文件总数为 **49**（不含 `.git`）；
 3. `--checksum` 输出与仓库根目录 `CHECKSUM.txt` 完全一致。
 
 任一不满足即视为**安装未完成**，不要开始审查，重新完整复制后再校验。

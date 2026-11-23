@@ -9,19 +9,24 @@ from __future__ import annotations
 
 import copy
 import itertools
+import json
 import random
 import tempfile
 from pathlib import Path
 
 from canonical import (
+    canonical_json,
     issue_id,
     input_hash,
     norm_text,
     output_hash,
     params_hash,
+    sha256_hex,
     stable_issues,
 )
 from evolve import apply_proposal, gate, validate_proposal
+from golden import load_and_validate, score_suite
+from versions import read_current, release, rollback, stage_shadow
 from validate import (
     manifest_core,
     validate_cross_products,
@@ -188,6 +193,96 @@ def main() -> int:
         target = apply_proposal(cfg, good, td)
         written = target.read_text(encoding="utf-8")
         check("E3 新版本独立落盘", target.exists() and "6" in written and cfg["thresholds"]["quantity_deviation_pct"] == 5)
+
+    # E1b 分级：B 类拒绝、审批人支持列表
+    b_class = copy.deepcopy(good)
+    b_class["changes"] = {"dimensions.DIM-01": "改名"}
+    check("E1b B 类键被拒绝", validate_proposal(b_class) != [])
+
+    multi = copy.deepcopy(good)
+    multi["approved_by"] = ["PM-张三", "LG-李四"]
+    check("E1b 审批人列表通过", validate_proposal(multi) == [])
+
+    empty = copy.deepcopy(good)
+    empty["approved_by"] = ["  "]
+    check("E1b 空审批人被拒绝", validate_proposal(empty) != [])
+
+    # T6 黄金集：结构、完美回放、漏报、误报、重复评分一致
+    golden_dir = Path(__file__).resolve().parent.parent / "evolve" / "golden"
+    cases, golden_errors = load_and_validate(golden_dir)
+    check("T6 黄金集用例结构合法", bool(cases) and not golden_errors,
+          "%d 例%s" % (len(cases), "" if not golden_errors else "；" + golden_errors[0]))
+
+    perfect = {c["case_id"]: copy.deepcopy(c["expected"]) for c in cases}
+    score1 = score_suite(cases, perfect)
+    agg1 = score1["aggregate"]
+    check("T6 完美回放召回=1", agg1["recall"] == 1.0)
+    check("T6 完美回放误报=0", agg1["false_positive_rate"] == 0.0)
+    check("T6 完美回放等级一致=1", agg1["severity_agreement"] == 1.0)
+    score2 = score_suite(cases, perfect)
+    check("T6 两次评分结果一致", canonical_json(score1) == canonical_json(score2))
+
+    partial = {
+        cid: (rows[:-1] if len(rows) > 1 else [])
+        for cid, rows in perfect.items()
+    }
+    check("T6 漏报导致召回下降",
+          score_suite(cases, partial)["aggregate"]["recall"] < 1.0)
+
+    known = {row["编号"] for c in cases for row in c["expected"]}
+    fp_id = next(
+        "RISK-%s01" % letter
+        for letter in "ABCDEFGHIJKLMNOPQRST"
+        if "RISK-%s01" % letter not in known
+    )
+    noisy = {cid: rows + [{"编号": fp_id, "结论": "存在风险", "风险等级": "低"}]
+             for cid, rows in perfect.items()}
+    check("T6 误报导致误报率上升",
+          score_suite(cases, noisy)["aggregate"]["false_positive_rate"] > 0)
+
+    # E4 版本化：shadow 不动线上、release 原子切换、rollback 可恢复
+    with tempfile.TemporaryDirectory() as td:
+        cfg = {"thresholds": {"quantity_deviation_pct": 5}, "output_fields": []}
+        prop1 = {
+            "base_version": "1.3.0",
+            "new_version": "1.3.1",
+            "changes": {"thresholds.quantity_deviation_pct": 6},
+            "evidence_runs": 40,
+            "approved_by": ["PM-张三"],
+        }
+        stage_shadow(td, cfg, prop1)
+        check("E4 shadow 不改线上指针", read_current(td)["current"] is None)
+
+        release(td, "1.3.1", ["PM-张三"], "2026-11-23", {"baseline": {}, "candidate": {}})
+        check("E4 release 原子切换指针", read_current(td)["current"] == "1.3.1")
+
+        released_cfg = read_current(td)
+        check("E4 release 写入历史",
+              len(released_cfg["history"]) == 1
+              and released_cfg["history"][0]["config_checksum"]
+              != sha256_hex(canonical_json(cfg)))
+
+        cfg2 = json.loads(
+            (Path(td) / "versions" / "released" / "1.3.1" / "config.json").read_text(encoding="utf-8")
+        )
+        prop2 = {
+            "base_version": "1.3.1",
+            "new_version": "1.3.2",
+            "changes": {"thresholds.quantity_deviation_pct": 7},
+            "evidence_runs": 40,
+            "approved_by": ["PM-张三"],
+        }
+        stage_shadow(td, cfg2, prop2)
+        release(td, "1.3.2", ["PM-张三"], "2026-11-24", {})
+        rollback(td, "1.3.1", ["PM-张三"], "2026-11-25")
+        doc = read_current(td)
+        check("E4 rollback 恢复旧指针",
+              doc["current"] == "1.3.1"
+              and doc["history"][-1]["action"] == "rollback"
+              and len(doc["history"]) == 3)
+        check("E4 旧版本目录保留",
+              (Path(td) / "versions" / "released" / "1.3.1" / "config.json").is_file()
+              and (Path(td) / "versions" / "released" / "1.3.2" / "config.json").is_file())
 
     print()
     print("汇总: %d 项检查, %d 失败" % (CHECKS, len(FAILS)))

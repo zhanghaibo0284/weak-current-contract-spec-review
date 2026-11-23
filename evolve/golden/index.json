@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "updated": "2026-11-23",
+  "note": "黄金集索引；用例文件数必须与 cases 数组长度一致，新增用例后同步本文件。",
+  "cases": [
+    {
+      "case_id": "G-001",
+      "file": "cases/G-001.json",
+      "title": "轨道交通通信集成（站段通信 + 设备材料表）",
+      "project_type": "轨道交通弱电集成",
+      "tags": [
+        "通信",
+        "数量配比",
+        "开放式措辞"
+      ],
+      "expected_rows": 11
+    },
+    {
+      "case_id": "G-002",
+      "file": "cases/G-002.json",
+      "title": "楼宇智能化（门禁 + 视频监控 + 综合布线）",
+      "project_type": "建筑智能化",
+      "tags": [
+        "安防",
+        "参数核实",
+        "界面划分"
+      ],
+      "expected_rows": 9
+    },
+    {
+      "case_id": "G-003",
+      "file": "cases/G-003.json",
+      "title": "既有弱电改造（机房 + 综合布线）",
+      "project_type": "弱电改造",
+      "tags": [
+        "机房",
+        "改造",
+        "质保与移交"
+      ],
+      "expected_rows": 11
+    }
+  ]
+}

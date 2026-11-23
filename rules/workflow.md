@@ -125,4 +125,6 @@
 
 ### 11.5 进化边界
 
-只允许改 `rules/config.json` 中的阈值、召回档与 quick 档子集，且须通过"5 次确定性复跑、召回不降、误报增幅 ≤2 个百分点、覆盖 =187、耗时 ≤1.2 倍"五道门；规则文本、7 字段、六步顺序、编号命名空间不可自动进化，详见 `guard/evolve.py`。
+只允许改 `rules/config.json` 中的阈值、召回档与 quick 档子集（A 类，单人审批）；维度归属、升级条件、分支映射属 B 类，需双人审批与灰度，本版本不开放自动发布；规则文本、7 字段、六步顺序、编号命名空间属 C 类，禁止自动进化。
+
+A 类提案须通过"5 次确定性复跑、召回不降、误报增幅 ≤2 个百分点、覆盖 =187、耗时 ≤1.2 倍"五道门，并在 `evolve/golden/` 黄金集上回测；发布先写 `versions/shadow/<版本>/`，验证通过后切换 `versions/current.json`，可用 `guard/evolve_cli.py rollback` 回滚。详见 `guard/evolve.py`、`guard/golden.py`、`guard/versions.py` 与 `evolve/README.md`。

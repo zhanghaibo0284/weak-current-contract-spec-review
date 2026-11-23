@@ -19,8 +19,20 @@ weak-current-contract-spec-review/
 ├── guard/
 │   ├── canonical.py
 │   ├── evolve.py
+│   ├── evolve_cli.py
+│   ├── golden.py
 │   ├── selftest.py
-│   └── validate.py
+│   ├── validate.py
+│   └── versions.py
+├── evolve/
+│   ├── README.md
+│   └── golden/
+│       ├── schema.json
+│       ├── index.json
+│       └── cases/
+│           ├── G-001.json
+│           ├── G-002.json
+│           └── G-003.json
 ├── rules/
 │   ├── adjudication.md
 │   ├── capability.md
@@ -53,22 +65,31 @@ weak-current-contract-spec-review/
     └── run-manifest.schema.json
 ```
 
-共 32 个文件，合计 2930 行（不含 MANIFEST.md 自身）。
+共 38 个文件，合计 3398 行（不含 MANIFEST.md 自身）。
 
 ## 2. 逐文件内容索引
 
 | 路径 | 行数 | 字节 | 校验和（SHA-256 前 12 位） | 职责 | 来源 |
 |---|---|---|---|---|---|
 | `PORTING.md` | 94 | 8403 | `93def1a883a1` | 占位符目录、按平台形态的替换要点、校验和算法、回测建议 | 重新组织 + 本次补充 |
-| `README.md` | 201 | 8712 | `3fe004e27b8f` | 目录说明 / 安装部署 / 快速上手 | 重新组织 |
-| `INSTALL.md` | 105 | 4176 | `d2b9c30d565e` | 安装指南：文件清单、目标路径、安装提示词、校验与失败判据 | 新增 |
-| `SKILL.md` | 192 | 13954 | `e114abb1cb07` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
-| `verify_skill.py` | — | — | — | 结构一致性校验器与校验和生成器 | 新增 |
+| `README.md` | 204 | 9267 | `b68eef7056cf` | 目录说明 / 安装部署 / 快速上手 | 重新组织 |
+| `INSTALL.md` | 107 | 4491 | `495ea580f08a` | 安装指南：文件清单、目标路径、安装提示词、校验与失败判据 | 新增 |
+| `SKILL.md` | 202 | 15574 | `e0eae325d911` | 标准 skill 唯一入口：触发/目标/流程/输出/硬约束 + 健壮性自检 | 重新组织 |
+| `verify_skill.py` | — | — | — | 结构一致性校验器与校验和生成器（37 项） | 新增 |
 | `templates/run-manifest.schema.json` | 66 | 1926 | `dd1c71786cfe` | 运行清单契约：输入/参数/规则/产物四类指纹 | 新增 |
 | `guard/canonical.py` | 124 | 4049 | `8001a2b5dbd4` | 确定性内核：归一化、稳定排序、稳定编号、三类指纹 | 新增 |
 | `guard/validate.py` | 92 | 3630 | `71949ecc21c8` | 一致性校验 C1~C5：字段/台账/互证/指纹 | 新增 |
-| `guard/evolve.py` | 151 | 5962 | `7d6b901360fd` | 进化提案校验、五道门、原子落盘 | 新增 |
-| `guard/selftest.py` | 198 | 6918 | `13f9c28d539d` | 确定性与进化门禁回归自检（19 项） | 新增 |
+| `guard/evolve.py` | 187 | 7094 | `176fca181ab5` | 进化提案校验、A/B/C 分级、五道门、原子落盘 | 新增 |
+| `guard/selftest.py` | 293 | 11153 | `a19da6bded82` | 确定性与进化门禁回归自检（34 项） | 新增 |
+| `guard/golden.py` | 176 | 6871 | `44ed2e9a0906` | 黄金集加载、校验、召回/误报/等级/覆盖评分 | 新增 |
+| `guard/versions.py` | 207 | 6397 | `05b5d7bb54ce` | 配置版本化：shadow/released/current 指针与回滚 | 新增 |
+| `guard/evolve_cli.py` | 153 | 5289 | `4b6669ac6328` | 进化命令行：validate/score/shadow/release/rollback/status | 新增 |
+| `evolve/README.md` | 67 | 3266 | `9ca5d3e7e5b5` | 进化工作区说明：分级、流水线、命令、边界 | 新增 |
+| `evolve/golden/schema.json` | 121 | 2608 | `62737781f807` | 黄金集用例结构契约 | 新增 |
+| `evolve/golden/index.json` | 43 | 1107 | `0388e2cc46c9` | 黄金集索引（3 例，与 cases 文件数一致） | 新增 |
+| `evolve/golden/cases/G-001.json` | 76 | 1781 | `0b2578bebb71` | 匿名化种子用例：轨道交通通信（11 行期望） | 新增 |
+| `evolve/golden/cases/G-002.json` | 67 | 1567 | `903b3968e73d` | 匿名化种子用例：楼宇智能化（9 行期望） | 新增 |
+| `evolve/golden/cases/G-003.json` | 77 | 1778 | `ae6573334587` | 匿名化种子用例：既有弱电改造（11 行期望） | 新增 |
 | `rules/adjudication.md` | 79 | 9771 | `a4c18c98f8ef` | 六类异常判定、3 个综合判定范式、召回优先词表 | 原 `SKILL.md` 第 9 章 |
 | `rules/capability.md` | 91 | 7523 | `51e7c53d5de9` | 能力定位、适用/不适用场景、接入约定 | 原 `SKILL.md` 第 1~4 章与 12.3 节 |
 | `rules/checkitems-parameter.md` | 145 | 38266 | `f80dd5f769c5` | 设备参数核实项 63 条（P01~P63 / 14 组） | 原 `SKILL.md` 第 8.3 节 |
@@ -86,7 +107,7 @@ weak-current-contract-spec-review/
 | `rules/rule-record.schema.json` | 87 | 1911 | `4534f4001236` | 单条规则的数据结构 | 重新组织 |
 | `rules/severity.md` | 56 | 4269 | `ac2c0f6c5038` | 三级定义、待核验语义、升级规则、结论/等级消歧 | 原 `SKILL.md` 第 7 章 + 本次修正 |
 | `rules/standards-index.md` | 84 | 4227 | `b5ad0ed4075f` | 常用标准规范基线与现行性核对方法 | 新增 |
-| `rules/workflow.md` | 128 | 9146 | `9ead2d1a6fb7` | 六步流程、判定分支、角色、复核闭环、异常处理、状态机 | 原 `SKILL.md` 第 10 章 + 本次补充 |
+| `rules/workflow.md` | 130 | 9556 | `9f2982af24e2` | 六步流程、判定分支、角色、复核闭环、异常处理、状态机 | 原 `SKILL.md` 第 10 章 + 本次补充 |
 | `templates/auxiliary-tables.md` | 25 | 967 | `e56ac50435c6` | 项目基线表、数量核对表 | 原 `SKILL.md` 第 11.2 节 |
 | `templates/cost-model.md` | 64 | 3521 | `1f1f3f276f56` | 影响分析量化公式库 | 新增 |
 | `templates/coverage-ledger.md` | 91 | 4478 | `d392b74b55e0` | 187 条逐项结论台账（G1 强制交付物） | 新增 |
@@ -110,6 +131,8 @@ weak-current-contract-spec-review/
 - ## 7. 快速调用顺序
 - ## 8. 不变式
 - ## 9. 健壮性与自检
+- ## 10. 确定性执行（DET）
+- ## 11. 自我进化边界（EVO）
 
 ### `rules/workflow.md`
 
@@ -172,6 +195,8 @@ weak-current-contract-spec-review/
 | 边界声明条款 | 7 | 7 | PASS |
 | 异常码 E-01~E-08 | 8 | 8 | PASS |
 | 占位符登记 | 31 | 31 | PASS |
+| 黄金集用例 | 3 | 3 | PASS |
+| 进化 A 类白名单键 | 8 | 8 | PASS |
 
 **总体：全部通过（以 `python verify_skill.py` 输出为准）**
 

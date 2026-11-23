@@ -1,7 +1,7 @@
 ---
 name: weak-current-contract-spec-review
 description: 面向弱电/智能化/轨道交通机电集成项目的合同与技术规格书审查能力。对合同正文、技术规格书、设备材料表、报价册、投标响应等材料做初步风险筛查与参数核实，输出可定位、可判定、可闭环的结构化问题清单。用于辅助项目团队在合同交底、设计联络、到货验收前有重点地复核，不替代人工评审与法律意见。
-version: 1.2.0
+version: 1.3.0
 category: 合同审查 / 技术合规 / 风险控制
 tags: [合同审查, 技术规格书, 弱电集成, 参数核实, 数量核对, 风险识别, 验收标准, 质保售后]
 platform: neutral
@@ -54,8 +54,17 @@ platform: neutral
 | `templates/run-manifest.schema.json` | 运行清单契约：输入/参数/规则/产物四类指纹 | 每次运行结束 |
 | `guard/canonical.py` | 确定性内核：归一化、稳定排序、稳定编号、指纹 | 运行开始与输出时 |
 | `guard/validate.py` | 一致性校验 C1~C5：字段/台账/互证/指纹 | 输出前强制 |
-| `guard/evolve.py` | 进化提案校验、五道门、原子落盘 | 发布配置变更时 |
-| `guard/selftest.py` | 确定性与门禁回归自检 | 改动 guard 后 |
+| `guard/evolve.py` | 进化提案校验、A/B/C 分级、五道门、原子落盘 | 发布配置变更时 |
+| `guard/selftest.py` | 确定性与门禁回归自检（34 项） | 改动 guard 后 |
+| `guard/golden.py` | 黄金集加载、校验与评分（召回/误报/等级一致/覆盖） | 发布前回测时 |
+| `guard/versions.py` | 配置版本化：shadow / released / current 指针与回滚 | 发布与回滚时 |
+| `guard/evolve_cli.py` | 进化命令行：validate / score / shadow / release / rollback / status | 发布配置变更时 |
+| `evolve/README.md` | 进化工作区说明、A/B/C 分级与流水线 | 发布配置变更时 |
+| `evolve/golden/schema.json` | 黄金集用例结构契约 | 新增用例时 |
+| `evolve/golden/index.json` | 黄金集索引（文件数须与 cases 一致） | 回测时 |
+| `evolve/golden/cases/G-001.json` | 匿名化种子用例：轨道交通通信 | 回测时 |
+| `evolve/golden/cases/G-002.json` | 匿名化种子用例：楼宇智能化 | 回测时 |
+| `evolve/golden/cases/G-003.json` | 匿名化种子用例：既有弱电改造 | 回测时 |
 
 ---
 
@@ -164,9 +173,9 @@ platform: neutral
 1. **异常先声明**：解析/读取失败时按 `rules/parsing.md` 的 E-01~E-08 处置，禁止静默跳过或臆测补全；任何降级都必须写入报告「解析质量声明」。
 2. **材料门槛**：齐备度不足时按 `rules/inputs.md` 5.4 阻断全量审查，先出材料缺口清单。
 3. **编号消歧**：对外引用一律使用 `RISK-` / `QTY-` / `PARAM-` 前缀，避免 `R05`、`P02`、`G01` 同号（见 `rules/indexes.md` A.4）。
-4. **结构自检**：改动规则或模板后运行 `python verify_skill.py`，须全部通过；校验项包括文件存在性、规则条数与编号唯一性、枚举一致性、交叉引用可解析、占位符闭环、MANIFEST 一致性。
+4. **结构自检**：改动规则或模板后运行 `python verify_skill.py`，须全部通过；校验项包括文件存在性、规则条数与编号唯一性、枚举一致性、交叉引用可解析、占位符闭环、黄金集索引一致性、进化白名单可解析、MANIFEST 一致性。
 5. **规则指纹**：报告概览须给出 `{{RULESET_CHECKSUM}}`，算法见 `PORTING.md` 1.1，可用 `python verify_skill.py --checksum` 生成。
-6. **确定性与一致性**：输出前按 `guard/validate.py` 执行 C1~C5 校验；产物须附 `run_manifest`（输入/参数/规则/产物四类指纹），提交前用 `python verify_skill.py --run <输出目录>` 复核。
+6. **确定性与一致性**：输出前按 `guard/validate.py` 执行 C1~C5 校验；产物须附 `run_manifest`（输入/参数/规则/产物四类指纹），提交前用 `python verify_skill.py --run <输出目录>` 复核；改动 `guard/` 后运行 `python guard/selftest.py`，须全部通过。
 
 ---
 
@@ -185,8 +194,9 @@ platform: neutral
 
 ## 11. 自我进化边界（EVO）
 
-1. **只进化配置轴**：A 类（阈值、召回档、quick 档子集）可自动提案；B 类（分支映射）需双人审批。
-2. **禁止自动进化**：规则文本、7 字段、六步顺序、187 条数量、编号命名空间、边界声明——仅人工版本升级。
-3. **提案门槛**：证据运行 ≥30 次，版本号必须递增，变更键必须在白名单且不越界。
+1. **分级**：A 类（阈值、召回档、quick 档子集）可自动提案，单人审批；B 类（维度归属、升级条件、分支映射）需双人审批与灰度，本版本不开放自动发布，提案直接拒绝；C 类（规则文本、7 字段、六步顺序、187 条、编号命名空间、边界声明）仅人工版本升级。
+2. **提案门槛**：证据运行 ≥30 次，版本号必须递增，变更键必须在 A 类白名单且不越界。
+3. **黄金集回测**：`evolve/golden/` 用例给出期望台账行；`python guard/evolve_cli.py score --actual <文件>` 计算召回、误报率、等级一致率与覆盖率，两次评分须完全一致。
 4. **五道门**：5 次确定性复跑一致、召回不降、误报增幅 ≤2 个百分点、覆盖 =187、耗时 ≤1.2 倍。
-5. **发布方式**：写入 `versions/<新版本>/`，线上指针原子切换，旧版本保留可回滚；运行中的审查不受影响。
+5. **shadow 与发布**：先写 `versions/shadow/<版本>/`（线上指针不动），门禁与人工审批通过后写入 `versions/released/<版本>/` 并原子切换 `versions/current.json`；`rollback` 可切回任一已发布版本，旧目录保留。
+6. **运行隔离**：进化只在离线批处理发生，运行中的审查仍锁定当时的 ruleset 与 config 指纹，历史产物可按原指纹复核。

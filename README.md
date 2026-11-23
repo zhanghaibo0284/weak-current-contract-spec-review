@@ -14,7 +14,8 @@ weak-current-contract-spec-review/
 ├── PORTING.md            跨平台导入：占位符、校验和算法、回测建议
 ├── MANIFEST.md           完整目录、逐文件索引、校验结果
 ├── verify_skill.py       结构一致性校验器（可复现，支持 --run 校验产物）
-├── guard/                确定性内核 / 一致性校验 / 进化门禁 + 自检
+├── guard/                确定性内核 / 一致性校验 / 进化门禁 / 黄金集评分 / 版本化
+├── evolve/               黄金集与离线进化说明
 ├── rules/                规则、解析契约、标准基线、术语、配置
 └── templates/            问题清单、覆盖台账、RFI、报告、成本模型
 ```
@@ -64,7 +65,7 @@ git clone --depth 1 https://gitee.com/zhanghaibo0284/weak-current-contract-spec-
 | Claude Code（项目） | `<项目>/.claude/skills/weak-current-contract-spec-review/` |
 | Trae（个人） | `~/.trae-cn/skills/weak-current-contract-spec-review/` |
 
-3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/` 与 `templates/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`，文件总数为 40。
+3. 要求：`SKILL.md` 直接位于该目录下（不要多套一层），`rules/`、`templates/`、`guard/`、`evolve/` 必须整目录复制，排除 `.git`、`.screenshots`、`__pycache__`、`versions/`，文件总数为 49。
 
 4. 重启 Claude Code / Trae。
 
@@ -95,7 +96,7 @@ python verify_skill.py              # 失败数必须为 0
 python verify_skill.py --checksum   # 必须与仓库根目录 CHECKSUM.txt 一致
 ```
 
-三条同时满足才算安装完成：失败数 0、文件数 40、校验值与 `CHECKSUM.txt` 一致。
+三条同时满足才算安装完成：失败数 0、文件数 49、校验值与 `CHECKSUM.txt` 一致。
 
 ### 升级与卸载
 
@@ -173,13 +174,14 @@ Remove-Item "$env:USERPROFILE\.trae-cn\skills\weak-current-contract-spec-review"
 ## 质量校验
 
 ```powershell
-python verify_skill.py              # 33 项结构校验
+python verify_skill.py              # 37 项结构校验
 python verify_skill.py --checksum   # 生成 {{RULESET_CHECKSUM}}
 python verify_skill.py --ledger out/coverage-ledger.md   # 校验台账完整性
+python guard/selftest.py            # 34 项确定性与进化回归
 ```
 
 校验覆盖：文件存在性、规则条数与编号唯一/连续、枚举一致性、交叉引用可解析、
-占位符闭环、旧章节号残留、MANIFEST 统计行。
+占位符闭环、旧章节号残留、黄金集索引与用例、进化白名单、MANIFEST 统计行。
 
 ---
 
@@ -193,6 +195,7 @@ python verify_skill.py --ledger out/coverage-ledger.md   # 校验台账完整性
 
 ## 版本与来源
 
+- 版本 1.3.0：接入进化闭环——新增黄金集（`evolve/golden/`）、评分与版本化脚本（`guard/golden.py`、`guard/versions.py`、`guard/evolve_cli.py`）；A 类提案可自动流水线，B 类显式拒绝，shadow → release → rollback 全链路可审计；规则文本与 7 字段契约未变。
 - 版本 1.2.0：接入确定性内核与运行清单——新增 `guard/`（归一化/稳定编号/指纹/一致性校验/进化门禁）与 `--run` 产物校验；规则文本与 7 字段契约未变。
 - 版本 1.1.0，能力编号 CAP-CSR-001（在 1.0.0 基础上做向后兼容修订，7 字段与规则编号未变）。
 - 1.1.0 主要变化：新增覆盖台账与校验器、补齐空模板、统一等级枚举、增加异常码与状态机、
