@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""自我进化门禁（EVO）：只允许改配置轴，且必须通过确定性/回归/覆盖/审批四道门。"""
+"""自我进化门禁（EVO）：只允许改配置轴，且必须通过确定性/回归/覆盖/耗时/审批五道门。"""
 
 from __future__ import annotations
 
@@ -92,7 +92,7 @@ def validate_proposal(proposal: dict) -> list[str]:
 
 
 def gate(baseline: dict, candidate: dict, determinism_runs: int) -> list[str]:
-    """四道门：确定性、召回、误报、覆盖。任何一项不过即阻断。"""
+    """五道门：确定性、召回、误报、覆盖、耗时。任何一项不过即阻断。"""
     errors = []
     if determinism_runs < 5:
         errors.append("确定性复跑次数不足 5 次")
